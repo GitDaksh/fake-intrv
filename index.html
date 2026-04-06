@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MockedAI — Interview Simulator</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- NOISE OVERLAY -->
+  <div class="noise"></div>
+
+  <!-- BACKGROUND PULSE -->
+  <div class="bg-pulse" id="bgPulse"></div>
+
+  <!-- SCREEN: INTRO -->
+  <div class="screen active" id="screen-intro">
+    <div class="intro-content">
+      <div class="logo-mark">
+        <div class="logo-icon">
+          <span></span><span></span><span></span>
+        </div>
+        <span class="logo-text">MockedAI</span>
+      </div>
+      <h1 class="headline">So you think<br/>you can code?</h1>
+      <p class="subline">A fake interview simulator for real developers.<br/>No AI judges. Just vibes and fake pressure.</p>
+      <button class="btn-primary" id="btnStart">
+        <span>Start Interview</span>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <p class="disclaimer">Results are fake. Judgment is real.</p>
+    </div>
+    <div class="intro-decoration">
+      <div class="grid-lines"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN: ROLE SELECT -->
+  <div class="screen" id="screen-role">
+    <div class="role-content">
+      <div class="step-indicator">
+        <span class="step-dot active"></span>
+        <span class="step-dot"></span>
+        <span class="step-dot"></span>
+      </div>
+      <h2 class="section-title">Choose your<br/>battleground.</h2>
+      <p class="section-sub">We'll find a question you definitely know. Probably.</p>
+      <div class="role-cards">
+        <div class="role-card" data-role="dsa">
+          <div class="role-card-inner">
+            <div class="role-icon">{ }</div>
+            <h3>DSA Interview</h3>
+            <p>Arrays, trees, dynamic programming, and other things you've memorized but can't explain.</p>
+            <div class="role-tag">Algorithmic</div>
+          </div>
+        </div>
+        <div class="role-card" data-role="frontend">
+          <div class="role-card-inner">
+            <div class="role-icon">&#60;/&#62;</div>
+            <h3>Frontend Interview</h3>
+            <p>CSS, JavaScript, and why you think React is "just a library." Bold choice.</p>
+            <div class="role-tag">UI Engineering</div>
+          </div>
+        </div>
+        <div class="role-card" data-role="system">
+          <div class="role-card-inner">
+            <div class="role-icon">⬡</div>
+            <h3>System Design</h3>
+            <p>Design Twitter at scale using a whiteboard and the word "microservices" repeatedly.</p>
+            <div class="role-tag">Architecture</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN: COUNTDOWN -->
+  <div class="screen" id="screen-countdown">
+    <div class="countdown-content">
+      <p class="countdown-label">Interview starting in</p>
+      <div class="countdown-number" id="countdownNum">3</div>
+      <p class="countdown-sub" id="countdownSub">Breathe. Or don't.</p>
+    </div>
+  </div>
+
+  <!-- SCREEN: QUESTION -->
+  <div class="screen" id="screen-question">
+    <div class="question-layout">
+
+      <!-- Top bar -->
+      <div class="question-topbar">
+        <div class="topbar-left">
+          <span class="q-label" id="qLabel">Q1 / 5</span>
+          <span class="q-role-badge" id="qRoleBadge">DSA</span>
+        </div>
+        <div class="timer-wrap">
+          <div class="timer-ring">
+            <svg class="timer-svg" viewBox="0 0 56 56">
+              <circle class="timer-bg" cx="28" cy="28" r="24"/>
+              <circle class="timer-progress" id="timerProgress" cx="28" cy="28" r="24"/>
+            </svg>
+            <span class="timer-text" id="timerText">90</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interviewer -->
+      <div class="interviewer-bubble" id="interviewerBubble">
+        <div class="avatar">
+          <span>AI</span>
+        </div>
+        <div class="bubble-content">
+          <span class="interviewer-name">Interviewer</span>
+          <p class="interviewer-msg" id="interviewerMsg">Take your time... I have nowhere to be.</p>
+        </div>
+      </div>
+
+      <!-- Question card -->
+      <div class="question-card">
+        <div class="question-difficulty" id="qDifficulty">Medium</div>
+        <p class="question-text" id="questionText">Loading question...</p>
+        <div class="question-tags" id="questionTags"></div>
+      </div>
+
+      <!-- Answer area -->
+      <div class="answer-area">
+        <div class="answer-header">
+          <span class="answer-label">Your answer</span>
+          <div class="typing-indicator" id="typingIndicator">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+        <textarea
+          class="code-input"
+          id="answerInput"
+          placeholder="// Start typing your answer here...
+// Don't overthink it. Or do. We can't stop you."
+          spellcheck="false"
+        ></textarea>
+        <div class="answer-footer">
+          <span class="char-count" id="charCount">0 chars</span>
+          <button class="btn-submit" id="btnSubmit">
+            <span>Submit Answer</span>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SCREEN: EVALUATING -->
+  <div class="screen" id="screen-evaluating">
+    <div class="eval-content">
+      <div class="eval-spinner">
+        <div class="spinner-ring"></div>
+        <div class="spinner-ring delay1"></div>
+        <div class="spinner-ring delay2"></div>
+      </div>
+      <p class="eval-title" id="evalTitle">Analyzing your answer...</p>
+      <p class="eval-sub" id="evalSub">Looking for things to criticize.</p>
+    </div>
+  </div>
+
+  <!-- SCREEN: FEEDBACK -->
+  <div class="screen" id="screen-feedback">
+    <div class="feedback-layout">
+      <div class="feedback-header">
+        <span class="q-label" id="fbQLabel">Q1 of 5</span>
+        <div class="feedback-score-badge" id="fbScoreBadge">78</div>
+      </div>
+
+      <div class="feedback-verdict" id="fbVerdict">
+        <span class="verdict-icon">◈</span>
+        <span id="fbVerdictText">Not bad. Not good either.</span>
+      </div>
+
+      <div class="feedback-details">
+        <div class="feedback-item" id="fbItem1">
+          <span class="fb-icon">→</span>
+          <span id="fbText1">Good approach overall.</span>
+        </div>
+        <div class="feedback-item" id="fbItem2">
+          <span class="fb-icon">→</span>
+          <span id="fbText2">Missed some edge cases.</span>
+        </div>
+        <div class="feedback-item" id="fbItem3">
+          <span class="fb-icon">→</span>
+          <span id="fbText3">Time complexity could be improved.</span>
+        </div>
+      </div>
+
+      <div class="mini-scores">
+        <div class="mini-score-item">
+          <span class="mini-label">Speed</span>
+          <div class="mini-bar-wrap"><div class="mini-bar" id="speedBar"></div></div>
+          <span class="mini-val" id="speedVal">—</span>
+        </div>
+        <div class="mini-score-item">
+          <span class="mini-label">Confidence</span>
+          <div class="mini-bar-wrap"><div class="mini-bar" id="confBar"></div></div>
+          <span class="mini-val" id="confVal">—</span>
+        </div>
+        <div class="mini-score-item">
+          <span class="mini-label">Vibe</span>
+          <div class="mini-bar-wrap"><div class="mini-bar" id="vibeBar"></div></div>
+          <span class="mini-val" id="vibeVal">—</span>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="btnNext">
+        <span id="btnNextText">Next Question</span>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- SCREEN: RESULTS -->
+  <div class="screen" id="screen-results">
+    <div class="results-layout">
+      <div class="results-header">
+        <p class="results-eyebrow">Interview Complete</p>
+        <div class="results-total-score" id="totalScoreDisplay">
+          <span class="score-number" id="totalScoreNum">72</span>
+          <span class="score-slash">/100</span>
+        </div>
+        <div class="final-verdict-badge" id="finalVerdictBadge">You survived… barely</div>
+      </div>
+
+      <div class="results-breakdown">
+        <h3 class="breakdown-title">Score Breakdown</h3>
+        <div class="breakdown-bars">
+          <div class="breakdown-row">
+            <span class="breakdown-label">Speed</span>
+            <div class="breakdown-bar-wrap">
+              <div class="breakdown-bar" id="resSpeedBar"></div>
+            </div>
+            <span class="breakdown-val" id="resSpeedVal">—</span>
+          </div>
+          <div class="breakdown-row">
+            <span class="breakdown-label">Confidence</span>
+            <div class="breakdown-bar-wrap">
+              <div class="breakdown-bar" id="resConfBar"></div>
+            </div>
+            <span class="breakdown-val" id="resConfVal">—</span>
+          </div>
+          <div class="breakdown-row">
+            <span class="breakdown-label">Vibe Score</span>
+            <div class="breakdown-bar-wrap">
+              <div class="breakdown-bar" id="resVibeBar"></div>
+            </div>
+            <span class="breakdown-val" id="resVibeVal">—</span>
+          </div>
+          <div class="breakdown-row">
+            <span class="breakdown-label">Overall</span>
+            <div class="breakdown-bar-wrap">
+              <div class="breakdown-bar highlight" id="resOverallBar"></div>
+            </div>
+            <span class="breakdown-val" id="resOverallVal">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="interviewer-closing">
+        <div class="avatar small">AI</div>
+        <p class="closing-msg" id="closingMsg">"Interesting performance. We'll be in touch. Or not."</p>
+      </div>
+
+      <div class="results-actions">
+        <button class="btn-primary" id="btnRetry">
+          <span>Try Again</span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8a6 6 0 1 1 1.5 4M2 12V8h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="btn-secondary" id="btnShare">Share Results</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
